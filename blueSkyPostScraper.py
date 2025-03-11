@@ -40,9 +40,9 @@ def convert_uri_to_link(uri):
 for keyword in keywords:
     params = {
         "q": keyword,
-        "limit": 100,
+        "limit": 40,
         "sort": 'latest',
-        "since": "2023-01-01T00:00:00Z",
+        "since": "2025-01-01T00:00:00Z",
         "until": datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
         "lang": "en",
         "cursor": ''
