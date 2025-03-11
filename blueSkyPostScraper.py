@@ -2,7 +2,7 @@ from atproto import Client
 import time
 import pandas as pd
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Log in to the server
 client = Client()
@@ -36,30 +36,39 @@ def convert_uri_to_link(uri):
     rkey = parts[4]
     return f"https://bsky.app/profile/{did}/post/{rkey}"
 
-# Iterate over each keyword and collect data
-for keyword in keywords:
-    params = {
-        "q": keyword,
-        "limit": 40,
-        "sort": 'latest',
-        "since": "2025-01-01T00:00:00Z",
-        "until": datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
-        "lang": "en",
-        "cursor": ''
-    }
+# Function to fetch posts
+def fetch_posts():
+    while True:
+        for keyword in keywords:
+            since_time = (datetime.now() - timedelta(minutes=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+            until_time = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+            params = {
+                "q": keyword,
+                "limit": 40,
+                "sort": 'latest',
+                "since": since_time,
+                "until": until_time,
+                "lang": "en",
+                "cursor": ''
+            }
 
-    response = client.app.bsky.feed.search_posts(params)
-    print(f"Posts fetched for keyword '{keyword}': {len(response.posts)}")
-    for post in response.posts:
-        data["author"].append(post.author.handle)
-        processed_text = preprocess_text(post.record.text)
-        data["text"].append(processed_text)
-        data["keyword"].append(keyword)
-        link = convert_uri_to_link(post.uri)
-        data["url"].append(link)
+            response = client.app.bsky.feed.search_posts(params)
+            print(f"Posts fetched for keyword '{keyword}': {len(response.posts)}")
+            for post in response.posts:
+                data["author"].append(post.author.handle)
+                processed_text = preprocess_text(post.record.text)
+                data["text"].append(processed_text)
+                data["keyword"].append(keyword)
+                link = convert_uri_to_link(post.uri)
+                data["url"].append(link)
 
-# Save data to a CSV file
-df = pd.DataFrame(data)
-df.index.name = 'index'  # Set the name for the index column
-df.to_csv('training.csv', index=True)
-print("Data saved to collected_posts.csv")
+            # Save data to a CSV file
+            df = pd.DataFrame(data)
+            df.index.name = 'index'  # Set the name for the index column
+            df.to_csv('training.csv', index=True)
+            print("Data saved to training.csv")
+
+        time.sleep(60)  # Wait for 1 minute before fetching new posts
+
+# Start fetching posts
+fetch_posts()
