@@ -9,7 +9,7 @@ const FruitList = () => {
     try {
       // GET request to our FastAPI
       const response = await api.get('/fruits');
-      setFruits(response.data.fruits);
+      setFruits(response.data);
     } catch (error) {
       console.error("Error fetching fruits", error);
     }
