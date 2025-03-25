@@ -12,8 +12,7 @@ class Fruits(BaseModel):
 
 app = FastAPI()
 
-origins = ["http://localhost:5173/",
-           "https://brave-wave-09bfea010.6.azurestaticapps.net/"]
+origins = ["http://localhost:5173"]
 
 app.add_middleware(
     CORSMiddleware,
