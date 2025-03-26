@@ -8,14 +8,8 @@ from sqlmodel import SQLModel, Session, create_engine, Field, select
 # SQLModel database object representing a fruit
 # A SQLModel object essentially links database objects to object classes in the code
 class dbFruit(SQLModel, table=True):
-    id: Optional[int] = Field(primary_key=True, index=True)
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
     name: str
-
-# Non-database objects
-class Fruit(BaseModel):
-    name: str
-class Fruits(BaseModel):
-    fruits: List[Fruit]
 
 app = FastAPI()
 
@@ -58,12 +52,12 @@ def read_fruits(
     fruits = session.exec(statement).all()
     return fruits
 
-# POST endpoint that adds a fruit to the memory_db list
+# POST endpoint that adds a fruit to the database table
 # FastAPI verifies the parameter is of the right type
 @app.post("/fruits")
-def add_fruit(fruit: Fruit):
-    memory_db["fruits"].append(fruit)
-    return fruit
+def add_fruit(fruit: dbFruit, session: Session = Depends(get_session)):
+    session.add(fruit)
+    session.commit()
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
