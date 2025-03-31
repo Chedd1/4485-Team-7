@@ -24,16 +24,13 @@ app.add_middleware(
 )
 
 # Set up database
-DATABASE_URL = "postgresql://neondb_owner:PASS@ep-dawn-rice-aafg5mw4-pooler.westus3.azure.neon.tech/neondb?sslmode=require"
+DATABASE_URL = "postgresql://neondb_owner:npg_Ej8h7OSegxab@ep-dawn-rice-aafg5mw4-pooler.westus3.azure.neon.tech/neondb?sslmode=require"
 engine = create_engine(DATABASE_URL, connect_args={})
 SQLModel.metadata.create_all(engine)
 
 def get_session():
     with Session(engine) as session:
         yield session
-
-# Temporary in-memory database
-memory_db = { "fruits": [] }
 
 # GET endpoint that calls read_fruits(), executnig a GET query on the database
 # FastAPI automatically converts the returned python object into JSON
