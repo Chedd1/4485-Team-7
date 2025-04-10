@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+sqlmodel
+psycopg2
+pandas
+torch
+transformers==4.36.2
+nltk

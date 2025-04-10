@@ -1,0 +1,57 @@
+/* index.css */
+
+/* General body styling */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    overflow: hidden; /* Prevents any overflow from breaking the rounded corners */
+    height: 100%;
+    flex-direction: column;
+    padding: 0;
+}
+
+.main-container {
+    border-radius: 12px;
+    overflow-y: auto;
+}
+
+/* Navbar styling */
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1rem 2rem;
+    background-color: #007bff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+    /* Navbar links */
+    nav a {
+        text-decoration: none;
+        color: #fff;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.5rem 1.2rem;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+        /* Hover effect for links */
+        nav a:hover {
+            background-color: #0056b3;
+            color: #f5f5f5;
+        }
+
+
+/* Optional: Add a subtle logo or text shadow to the header */
+h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+}
+
