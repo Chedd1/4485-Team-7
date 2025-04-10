@@ -1,0 +1,35 @@
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Large model files
+trained_model_bert_uncased/
+*.safetensors
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Large binary files
+*.dll
+*.lib
+*.pyd
+*.so
+
+# Model files
+*.bin
+*.pt
+*.pth
+*.onnx
+*.h5
+*.hdf5
+*.model
+*.weights 
