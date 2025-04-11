@@ -81,40 +81,77 @@ def update_posts_with_scores(posts, scores):
         return len(posts_to_delete)  # Return the number of deleted posts
 
 def main():
-    # Get unscored posts from the database
-    unscored_posts = get_unscored_posts()
-    
-    if not unscored_posts:
-        logger.info("No unscored posts found in the database.")
-        return
-    
-    logger.info(f"Found {len(unscored_posts)} unscored posts.")
-    
-    # Convert posts to DataFrame for processing
-    posts_data = {
-        'id': [post.id for post in unscored_posts],
-        'text': [post.text for post in unscored_posts],
-        'keyword': [post.keyword for post in unscored_posts]
-    }
-    df = pd.DataFrame(posts_data)
-    
-    # Preprocess text
-    df['text'] = df['text'].astype(str).fillna("").apply(clean_text)
-    df['keyword'] = df['keyword'].astype(str).fillna("").apply(clean_text)
-    
-    # Tokenize text
-    encodings = tokenizer(df['text'].tolist(), padding="max_length", truncation=True, max_length=256, return_tensors="pt")
-    encodings = {key: val.to(device) for key, val in encodings.items()}
-    
-    # Predict labels
-    with torch.no_grad():
-        outputs = model(**encodings)
-        predictions = torch.argmax(outputs.logits, axis=1).cpu().numpy()
-    
-    # Update the database with scores
-    deleted_count = update_posts_with_scores(unscored_posts, predictions)
-    
-    logger.info(f"Successfully processed {len(unscored_posts)} posts: {deleted_count} posts with score 0 were deleted, {len(unscored_posts) - deleted_count} posts were updated with non-zero scores.")
+    logger.info("Starting scoring process...")
+    try:
+        # Get unscored posts from the database
+        unscored_posts = get_unscored_posts()
+        
+        if not unscored_posts:
+            logger.info("No unscored posts found in the database.")
+            return
+        
+        logger.info(f"Found {len(unscored_posts)} unscored posts.")
+        
+        try:
+            # Convert posts to DataFrame for processing
+            posts_data = {
+                'id': [post.id for post in unscored_posts],
+                'text': [post.text for post in unscored_posts],
+                'keyword': [post.keyword for post in unscored_posts]
+            }
+            df = pd.DataFrame(posts_data)
+            
+            logger.info("Preprocessing text...")
+            # Preprocess text
+            df['text'] = df['text'].astype(str).fillna("").apply(clean_text)
+            df['keyword'] = df['keyword'].astype(str).fillna("").apply(clean_text)
+            
+            logger.info(f"Sample preprocessed text: {df['text'].iloc[0][:100]}...")
+            
+            logger.info("Tokenizing text...")
+            # Tokenize text
+            try:
+                encodings = tokenizer(df['text'].tolist(), padding="max_length", truncation=True, max_length=256, return_tensors="pt")
+                logger.info(f"Tokenization successful. Input shape: {encodings['input_ids'].shape}")
+                encodings = {key: val.to(device) for key, val in encodings.items()}
+            except Exception as e:
+                logger.error(f"Error during tokenization: {str(e)}")
+                logger.error(f"Tokenization error type: {type(e).__name__}")
+                raise
+            
+            logger.info("Running model predictions...")
+            # Predict labels
+            try:
+                with torch.no_grad():
+                    outputs = model(**encodings)
+                    logger.info(f"Model outputs shape: {outputs.logits.shape}")
+                    predictions = torch.argmax(outputs.logits, axis=1).cpu().numpy()
+                    logger.info(f"Predictions shape: {predictions.shape}")
+            except Exception as e:
+                logger.error(f"Error during model prediction: {str(e)}")
+                logger.error(f"Prediction error type: {type(e).__name__}")
+                raise
+            
+            logger.info(f"Predictions completed. Distribution: {pd.Series(predictions).value_counts().to_dict()}")
+            
+            # Update the database with scores
+            try:
+                deleted_count = update_posts_with_scores(unscored_posts, predictions)
+                logger.info(f"Successfully processed {len(unscored_posts)} posts: {deleted_count} posts with score 0 were deleted, {len(unscored_posts) - deleted_count} posts were updated with non-zero scores.")
+            except Exception as e:
+                logger.error(f"Error during database update: {str(e)}")
+                logger.error(f"Database error type: {type(e).__name__}")
+                raise
+                
+        except Exception as e:
+            logger.error(f"Error during scoring process: {str(e)}")
+            logger.error(f"Scoring error type: {type(e).__name__}")
+            raise
+            
+    except Exception as e:
+        logger.error(f"Fatal error in main scoring process: {str(e)}")
+        logger.error(f"Fatal error type: {type(e).__name__}")
+        raise
 
 if __name__ == "__main__":
     main()

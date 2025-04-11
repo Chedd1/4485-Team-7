@@ -49,17 +49,19 @@ is_fetching_complete = False
 
 def run_fetch_posts():
     """
-    Run the fetch_posts function in a separate thread
+    Run the fetch_posts function in a separate thread continuously
     """
     global is_fetching_complete
-    try:
-        logger.info("Starting tweet fetching process...")
-        fetch_posts()
-        logger.info("Tweet fetching completed. Starting scoring process...")
-        is_fetching_complete = True
-    except Exception as e:
-        logger.error(f"Error in tweet fetching: {e}")
-        is_fetching_complete = True  # Set to True even on error to allow scoring to start
+    while True:
+        try:
+            logger.info("Starting tweet fetching process...")
+            fetch_posts()
+            logger.info("Tweet fetching completed. Waiting before next fetch...")
+            is_fetching_complete = True  # Set to True to allow scoring to start
+            time.sleep(120)  # Wait 2 minutes before next fetch
+        except Exception as e:
+            logger.error(f"Error in tweet fetching: {e}")
+            time.sleep(120)  # Wait 2 minutes before retrying
 
 def run_score_posts():
     """
@@ -78,17 +80,32 @@ def run_score_posts():
         try:
             # Check if there are any unscored posts
             with Session(engine) as session:
-                unscored_count = session.exec(select(dbPost).where(dbPost.score == None)).count()
+                unscored_posts = session.exec(select(dbPost).where(dbPost.score == None)).all()
+                unscored_count = len(unscored_posts)
+                logger.info(f"Current unscored posts count: {unscored_count}")
                 if unscored_count > 0:
                     logger.info(f"Found {unscored_count} unscored posts. Running scoring...")
-                    score_posts()
+                    try:
+                        # Add more detailed logging
+                        logger.info("Starting score_posts function...")
+                        score_posts()
+                        logger.info("Scoring completed successfully")
+                    except Exception as e:
+                        logger.error(f"Error during scoring: {str(e)}")
+                        logger.error(f"Error type: {type(e).__name__}")
+                        logger.error(f"Error details: {e.__dict__ if hasattr(e, '__dict__') else 'No additional details'}")
+                        # Add a longer delay on error to prevent rapid retries
+                        time.sleep(300)  # Wait 5 minutes before retrying
+                        continue
                 else:
                     logger.info("No unscored posts found. Waiting...")
             
             time.sleep(60)  # Wait for 1 minute before next scoring
         except Exception as e:
-            logger.error(f"Error in scoring task: {e}")
-            time.sleep(60)  # Wait for 1 minute before retrying
+            logger.error(f"Critical error in scoring task: {str(e)}")
+            logger.error(f"Error type: {type(e).__name__}")
+            logger.error(f"Error details: {e.__dict__ if hasattr(e, '__dict__') else 'No additional details'}")
+            time.sleep(300)  # Wait 5 minutes before retrying
 
 @app.on_event("startup")
 async def startup_event():

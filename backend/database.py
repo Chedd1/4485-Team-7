@@ -10,6 +10,7 @@ class dbPost(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True, index=True)
     author: str
     text: str
+    original_text: str
     keyword: str
     createdAt: str
     url: str
@@ -19,7 +20,7 @@ class dbPost(SQLModel, table=True):
     score: Optional[int]
 
 
-DATABASE_URL = "postgresql://neondb_owner:PASS@ep-dawn-rice-aafg5mw4-pooler.westus3.azure.neon.tech/neondb?sslmode=require"
+DATABASE_URL = "postgresql://neondb_owner:npg_Ej8h7OSegxab@ep-dawn-rice-aafg5mw4-pooler.westus3.azure.neon.tech/neondb?sslmode=require"
 engine = create_engine(DATABASE_URL, connect_args={})
 SQLModel.metadata.create_all(engine)
 

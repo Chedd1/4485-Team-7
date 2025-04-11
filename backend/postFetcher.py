@@ -20,6 +20,7 @@ profile = client.login('projectdisaster.bsky.social', 'BskyDisasterAnalysis')
 data_storage = {
     "author": [],
     "text": [],
+    "original_text": [], 
     "keyword": [],
     "url": [],
     "createdAt": [],
@@ -101,6 +102,7 @@ def fetch_posts():
             # Store data
             data["author"].append(author)
             data["text"].append(processed_text)
+            data["original_text"].append(post.record.text)  # Store original text
             data["keyword"].append(keyword)
             data["createdAt"].append(createdAt)
             data["url"].append(link)
@@ -118,6 +120,7 @@ def fetch_posts():
                     post = dbPost(
                         author=data["author"][i],
                         text=data["text"][i],
+                        original_text=data["original_text"][i],
                         keyword=data["keyword"][i],
                         url=data["url"][i],
                         createdAt=data["createdAt"][i],
