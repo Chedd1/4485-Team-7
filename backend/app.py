@@ -127,7 +127,7 @@ async def startup_event():
 # GET all tweets
 @app.get("/tweets", response_model=List[dbPost])
 def get_all_tweets(session: Session = Depends(get_session)):
-    statement = select(dbPost)
+    statement = select(dbPost).order_by(dbPost.createdAt.desc())
     tweets = session.exec(statement).all()
     return tweets
 
