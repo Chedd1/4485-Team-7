@@ -7,6 +7,14 @@ import spacy
 from geopy.geocoders import Nominatim
 from sqlmodel import Session, select
 from database import dbPost, engine
+import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
+# Download VADER lexicon if needed
+nltk.download('vader_lexicon', quiet=True)
+
+# Initialize sentiment analyzer
+sentiment_analyzer = SentimentIntensityAnalyzer()
 
 # Load spaCy model for Named Entity Recognition (NER)
 nlp = spacy.load("en_core_web_trf")
@@ -64,6 +72,12 @@ def get_coordinates(location_name):
         print(f"Error geocoding {location_name}: {e}")
     return None, None
 
+# Function to get sentiment score from text
+def get_sentiment_score(text):
+    sentiment_dict = sentiment_analyzer.polarity_scores(text)
+    # Return compound score which is a normalized score between -1 and 1
+    return sentiment_dict['compound']
+
 # Function to fetch posts
 def fetch_posts():
     for keyword in keywords:
@@ -71,10 +85,10 @@ def fetch_posts():
         until_time = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
         params = {
             "q": keyword,
-            "limit": 100,
+            "limit": 20,
             "sort": 'top',
-            "since": since_time,
-            "until": until_time,
+            "since": "2024-01-01T00:00:00Z",
+            "until": "2025-01-01T00:00:00Z",
             "lang": "en",
             "cursor": ''
         }
@@ -87,6 +101,9 @@ def fetch_posts():
             processed_text = preprocess_text(post.record.text)
             link = convert_uri_to_link(post.uri)
             createdAt = post.record.created_at
+
+            # Calculate sentiment score
+            sentiment_score = get_sentiment_score(post.record.text)
 
             # Extract locations
             locations = extract_locations(processed_text)
@@ -117,6 +134,9 @@ def fetch_posts():
                 
                 # Only add the post if it doesn't already exist
                 if not existing_post:
+                    # Calculate sentiment score
+                    sentiment_score = get_sentiment_score(data["original_text"][i])
+                    
                     post = dbPost(
                         author=data["author"][i],
                         text=data["text"][i],
@@ -127,6 +147,7 @@ def fetch_posts():
                         location=data["location"][i],
                         latitude=data["latitude"][i],
                         longitude=data["longitude"][i],
+                        sentiment_score=sentiment_score
                     )
                     session.add(post)
             session.commit()

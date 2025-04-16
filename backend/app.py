@@ -145,6 +145,13 @@ def get_tweet_locations(session: Session = Depends(get_session)):
     tweets = session.exec(statement).all()
     return tweets
 
+# GET sentiment scores for all tweets
+@app.get("/tweets/sentiment")
+def get_sentiment_scores(session: Session = Depends(get_session)):
+    statement = select(dbPost).where(dbPost.sentiment_score.is_not(None))
+    tweets = session.exec(statement).all()
+    return tweets
+
 # POST a new tweet
 @app.post("/tweets", response_model=dbPost)
 def add_tweet(tweet: dbPost, session: Session = Depends(get_session)):
