@@ -21,7 +21,7 @@ class dbPost(SQLModel, table=True):
     sentiment_score: Optional[float] = None
 
 
-DATABASE_URL = "postgresql://neondb_owner:PASS@ep-dawn-rice-aafg5mw4-pooler.westus3.azure.neon.tech/neondb?sslmode=require"
+DATABASE_URL = "postgresql://neondb_owner:npg_Ej8h7OSegxab@ep-dawn-rice-aafg5mw4-pooler.westus3.azure.neon.tech/neondb?sslmode=require"
 engine = create_engine(DATABASE_URL, connect_args={})
 SQLModel.metadata.create_all(engine)
 

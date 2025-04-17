@@ -85,10 +85,10 @@ def fetch_posts():
         until_time = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
         params = {
             "q": keyword,
-            "limit": 20,
-            "sort": 'top',
-            "since": "2024-01-01T00:00:00Z",
-            "until": "2025-01-01T00:00:00Z",
+            "limit": 10,
+            "sort": 'latest',
+            "since": "2025-02-01T00:00:00Z",
+            "until": "2025-04-16T00:00:00Z",
             "lang": "en",
             "cursor": ''
         }

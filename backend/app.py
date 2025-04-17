@@ -5,7 +5,7 @@ from typing import List, Optional
 from sqlmodel import Session, select
 from database import dbPost, get_session, engine
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import threading
 import logging
@@ -131,6 +131,17 @@ def get_all_tweets(session: Session = Depends(get_session)):
     tweets = session.exec(statement).all()
     return tweets
 
+# GET tweets from the last 24 hours
+@app.get("/tweets/recent", response_model=List[dbPost])
+def get_recent_tweets(session: Session = Depends(get_session)):
+    # Calculate timestamp for 24 hours ago
+    twenty_four_hours_ago = (datetime.now() - timedelta(hours=24)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    
+    # Select tweets created in the last 24 hours
+    statement = select(dbPost).where(dbPost.createdAt >= twenty_four_hours_ago).order_by(dbPost.createdAt.desc())
+    tweets = session.exec(statement).all()
+    return tweets
+
 # GET tweets by keyword
 @app.get("/tweets/keyword/{keyword}", response_model=List[dbPost])
 def get_tweets_by_keyword(keyword: str, session: Session = Depends(get_session)):
@@ -141,7 +152,22 @@ def get_tweets_by_keyword(keyword: str, session: Session = Depends(get_session))
 # GET tweet locations for heatmap
 @app.get("/tweets/locations")
 def get_tweet_locations(session: Session = Depends(get_session)):
-    statement = select(dbPost).where(dbPost.latitude.is_not(None), dbPost.longitude.is_not(None))
+    statement = select(dbPost).where(
+        dbPost.latitude.is_not(None), 
+        dbPost.longitude.is_not(None),
+        dbPost.score == 1
+    )
+    tweets = session.exec(statement).all()
+    return tweets
+
+# GET tweet locations filtered by score
+@app.get("/tweets/locations/score/{score}")
+def get_tweet_locations_by_score(score: int, session: Session = Depends(get_session)):
+    statement = select(dbPost).where(
+        dbPost.latitude.is_not(None),
+        dbPost.longitude.is_not(None),
+        dbPost.score == score
+    )
     tweets = session.exec(statement).all()
     return tweets
 

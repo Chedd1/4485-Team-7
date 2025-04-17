@@ -21,6 +21,17 @@ export const tweetService = {
     }
   },
 
+  // Get tweets from the last 24 hours
+  getRecentTweets: async () => {
+    try {
+      const response = await api.get('/tweets/recent');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching recent tweets:', error);
+      throw error;
+    }
+  },
+
   // Get tweets by keyword
   getTweetsByKeyword: async (keyword) => {
     try {
