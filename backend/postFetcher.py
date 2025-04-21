@@ -81,14 +81,14 @@ def get_sentiment_score(text):
 # Function to fetch posts
 def fetch_posts():
     for keyword in keywords:
-        since_time = (datetime.now() - timedelta(minutes=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
-        until_time = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+        since_time = (datetime.now() - timedelta(hours=24)).strftime('%Y-%m-%dT%H:%M:%SZ') # 24 hours ago
+        until_time = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ') # current time
         params = {
             "q": keyword,
-            "limit": 10,
+            "limit": 30,
             "sort": 'latest',
-            "since": "2025-02-01T00:00:00Z",
-            "until": "2025-04-16T00:00:00Z",
+            "since": since_time,
+            "until": until_time,
             "lang": "en",
             "cursor": ''
         }
