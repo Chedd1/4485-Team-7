@@ -77,15 +77,31 @@ function App() {
         <Router>
             <nav style={{ 
                 display: "flex", 
+                flexDirection: "column",
                 padding: "10px 20px", 
                 backgroundColor: "#333", 
                 color: "white" 
             }}>
-                <Link to="/" style={{ color: "white", textDecoration: "none", margin: "0 10px" }}>Heat Map</Link>
-                <Link to="/marker-map" style={{ color: "white", textDecoration: "none", margin: "0 10px" }}>Pin Map</Link>
-                <Link to="/about" style={{ color: "white", textDecoration: "none", margin: "0 10px" }}>Tweets</Link>
+                <h1 style={{ 
+                    margin: "0 0 10px 0", 
+                    fontSize: "30px",
+                    textAlign: "center"
+                }}>Disaster Response Dashboard</h1>
+                <div style={{ 
+                    display: "flex",
+                    justifyContent: "center"
+                }}>
+                    <Link to="/" style={{ color: "white", textDecoration: "none", margin: "0 10px" }}>Heat Map</Link>
+                    <Link to="/marker-map" style={{ color: "white", textDecoration: "none", margin: "0 10px" }}>Pin Map</Link>
+                    <Link to="/about" style={{ color: "white", textDecoration: "none", margin: "0 10px" }}>Posts</Link>
+                </div>
             </nav>
-            <div className="main-content">
+            <div className="main-content" style={{
+                width: "100%",
+                maxWidth: "100vw",
+                overflowX: "hidden",
+                boxSizing: "border-box"
+            }}>
                 <Routes>
                     <Route
                         path="/"

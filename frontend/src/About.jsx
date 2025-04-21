@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { tweetService } from './services/api'; // <-- fixed path
  
 const disasterColors = {
@@ -42,7 +42,22 @@ export default function Home() {
     const [tweets, setTweets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(new Date());
- 
+    const tabContainerRef = useRef(null);
+
+    // Calculate counts for each category
+    const getCategoryCount = (category) => {
+        if (category === "All") {
+            return tweets.length;
+        }
+        return tweets.filter(tweet => {
+            const keyword = tweet.keyword.toLowerCase();
+            if (disasterKeywordMap[category] && disasterKeywordMap[category].includes(keyword)) {
+                return true;
+            }
+            return keyword === category.toLowerCase();
+        }).length;
+    };
+
     // 🛰️ Fetch tweets on mount
     useEffect(() => {
         async function fetchTweets() {
@@ -55,7 +70,8 @@ export default function Home() {
                 const parsed = data.map(tweet => ({
                     id: tweet.id || tweet.text, // fallback key
                     text: tweet.original_text,
-                    keyword: tweet.keyword
+                    keyword: tweet.keyword,
+                    sentiment_score: tweet.sentiment_score
                 }));
  
                 setTweets(parsed);
@@ -89,7 +105,8 @@ export default function Home() {
             const parsed = data.map(tweet => ({
                 id: tweet.id || tweet.text,
                 text: tweet.original_text,
-                keyword: tweet.keyword
+                keyword: tweet.keyword,
+                sentiment_score: tweet.sentiment_score
             }));
             setTweets(parsed);
             setLastUpdated(new Date());
@@ -101,9 +118,29 @@ export default function Home() {
     };
  
     return (
-        <div style={{ backgroundColor: "#312f74", minHeight: "100vh", padding: "16px", color: "white" }}>
+        <div style={{ backgroundColor: "#333", minHeight: "100vh", padding: "16px", color: "white" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                <div style={{ display: "flex", gap: "24px" }}>
+                <div 
+                    ref={tabContainerRef}
+                    style={{ 
+                        display: "flex", 
+                        gap: "24px",
+                        overflowX: "auto",
+                        paddingBottom: "8px",
+                        scrollbarWidth: "thin",
+                        scrollbarColor: "#ffffff50 transparent",
+                        "&::-webkit-scrollbar": {
+                            height: "4px"
+                        },
+                        "&::-webkit-scrollbar-track": {
+                            background: "transparent"
+                        },
+                        "&::-webkit-scrollbar-thumb": {
+                            background: "#ffffff50",
+                            borderRadius: "4px"
+                        }
+                    }}
+                >
                     {["All", "Avalanche", "Blizzard", "Drought", "Duststorm", "Earthquake", "Volcanic Eruption", "Flood","Hailstorm", "Hurricane", "Landslide", "Tornado", "Wildfire"].map(tab => (
                         <h1
                             key={tab}
@@ -114,10 +151,22 @@ export default function Home() {
                                 cursor: "pointer",
                                 borderBottom: activeTab === tab ? "3px solid white" : "none",
                                 paddingBottom: "4px",
-                                opacity: activeTab === tab ? 1 : 0.6
+                                opacity: activeTab === tab ? 1 : 0.6,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                whiteSpace: "nowrap"
                             }}
                         >
                             {tab}
+                            <span style={{
+                                fontSize: "14px",
+                                backgroundColor: "rgba(255, 255, 255, 0.2)",
+                                padding: "2px 6px",
+                                borderRadius: "12px"
+                            }}>
+                                {getCategoryCount(tab)}
+                            </span>
                         </h1>
                     ))}
                 </div>
@@ -184,6 +233,21 @@ export default function Home() {
                                 }}
                             >
                                 <p style={{ margin: "8px 0" }}>{tweet.text}</p>
+                                <div style={{ 
+                                    display: "flex", 
+                                    alignItems: "center", 
+                                    marginTop: "8px",
+                                    fontSize: "14px"
+                                }}>
+                                    <span style={{ 
+                                        padding: "4px 8px", 
+                                        borderRadius: "4px",
+                                        backgroundColor: tweet.sentiment_score > 0 ? "#e6f7e6" : tweet.sentiment_score < 0 ? "#ffe6e6" : "#f5f5f5",
+                                        color: tweet.sentiment_score > 0 ? "#2e7d32" : tweet.sentiment_score < 0 ? "#c62828" : "#616161"
+                                    }}>
+                                        Sentiment: {tweet.sentiment_score !== null ? tweet.sentiment_score.toFixed(2) : "N/A"}
+                                    </span>
+                                </div>
                             </div>
                         );
                     })
