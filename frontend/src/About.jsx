@@ -2,13 +2,13 @@
 import { tweetService } from './services/api'; // <-- fixed path
  
 const disasterColors = {
-    Avalanche: { background: "#FFF", text: "#000", border: "#476684" },
+    Avalanche: { background: "#FAF9F6", text: "#000", border: "#476684" },
     Blizzard: { background: "#6EB0EF", text: "#000", border: "#87CEEB" },
     Drought: { background: "#AD9270", text: "#000", border: "#855C50" },
     Duststorm: { background: "#FDD674", text: "#000", border: "#C1972D" },
     Earthquake: { background: "#D6B5A6", text: "#000", border: "#AB846F" },
-    "Volcanic Eruption": { background: "#F32B0D", text: "#FFF", border: "#FCB930" },
-    Flood: { background: "#0000FF  ", text: "#FFF", border: "#000088 " },
+    "Volcanic Eruption": { background: "#ED5555", text: "#000", border: "#FCB930" },
+    Flood: { background: "#1BDDD6", text: "#000", border: "#000088 " },
     Hailstorm: { background: "#D0D1E1", text: "#000", border: "#B4B3AE" },
     Hurricane: { background: "#A4948E", text: "#000", border: "#907C75" },
     Landslide: { background: "#A05C53", text: "#000", border: "#8B4513" },
@@ -71,7 +71,8 @@ export default function Home() {
                     id: tweet.id || tweet.text, // fallback key
                     text: tweet.original_text,
                     keyword: tweet.keyword,
-                    sentiment_score: tweet.sentiment_score
+                    sentiment_score: tweet.sentiment_score,
+                    createdAt: tweet.createdAt
                 }));
  
                 setTweets(parsed);
@@ -106,7 +107,8 @@ export default function Home() {
                 id: tweet.id || tweet.text,
                 text: tweet.original_text,
                 keyword: tweet.keyword,
-                sentiment_score: tweet.sentiment_score
+                sentiment_score: tweet.sentiment_score,
+                createdAt: tweet.createdAt
             }));
             setTweets(parsed);
             setLastUpdated(new Date());
@@ -237,7 +239,8 @@ export default function Home() {
                                     display: "flex", 
                                     alignItems: "center", 
                                     marginTop: "8px",
-                                    fontSize: "14px"
+                                    fontSize: "14px",
+                                    justifyContent: "space-between"
                                 }}>
                                     <span style={{ 
                                         padding: "4px 8px", 
@@ -246,6 +249,17 @@ export default function Home() {
                                         color: tweet.sentiment_score > 0 ? "#2e7d32" : tweet.sentiment_score < 0 ? "#c62828" : "#616161"
                                     }}>
                                         Sentiment: {tweet.sentiment_score !== null ? tweet.sentiment_score.toFixed(2) : "N/A"}
+                                    </span>
+                                    <span style={{ 
+                                        color: "rgb(10, 10, 10)",
+                                        fontSize: "14px",
+                                        fontStyle: "italic",
+                                        padding: "4px 8px",
+                                        borderRadius: "4px",
+                                        backgroundColor: "rgba(236, 228, 228, 0.3)",
+                                        backdropFilter: "blur(2px)"
+                                    }}>
+                                        {new Date(tweet.createdAt).toLocaleString()}
                                     </span>
                                 </div>
                             </div>
