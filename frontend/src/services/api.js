@@ -10,16 +10,6 @@ const api = axios.create({
 });
 
 export const tweetService = {
-  // Get all tweets
-  getAllTweets: async () => {
-    try {
-      const response = await api.get('/tweets');
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching tweets:', error);
-      throw error;
-    }
-  },
 
   // Get tweets from the last 24 hours
   getRecentTweets: async () => {
