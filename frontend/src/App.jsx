@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import TweetHeatMap from "./TweetHeatMap.jsx";
 import TweetMarkerMap from "./TweetMarkerMap.jsx";
 import About from "./About.jsx";
+import AnalyticsPanel from "./AnalyticsPanel.jsx";
 import { tweetService } from "./services/api.js"; //  make sure this path is correct
  
 function App() {
@@ -93,6 +94,7 @@ function App() {
                 }}>
                     <Link to="/" style={{ color: "white", textDecoration: "none", margin: "0 10px" }}>Heat Map</Link>
                     <Link to="/marker-map" style={{ color: "white", textDecoration: "none", margin: "0 10px" }}>Pin Map</Link>
+                    <Link to="/analytics" style={{ color: "white", textDecoration: "none", margin: "0 10px" }}>Analytics</Link>
                     <Link to="/about" style={{ color: "white", textDecoration: "none", margin: "0 10px" }}>Posts</Link>
                 </div>
             </nav>
@@ -175,6 +177,44 @@ function App() {
                                     <p style={{ textAlign: "center" }}>Loading map data...</p>
                                 ) : (
                                     <TweetMarkerMap tweetLocations={tweetLocations} />
+                                )}
+                            </div>
+                        }
+                    />
+                    <Route
+                        path="/analytics"
+                        element={
+                            <div>
+                                <h1 style={{ textAlign: "center" }}>Analytics View</h1>
+                                <div style={{ 
+                                    display: "flex", 
+                                    justifyContent: "space-between", 
+                                    alignItems: "center", 
+                                    padding: "0 16px",
+                                    marginBottom: "16px" 
+                                }}>
+                                    <div style={{ fontSize: "14px", color: "#666" }}>
+                                        Last updated: {lastUpdated.toLocaleString()}
+                                    </div>
+                                    <button 
+                                        onClick={refreshData}
+                                        style={{
+                                            backgroundColor: "#4CAF50",
+                                            color: "white",
+                                            border: "none",
+                                            padding: "8px 16px",
+                                            borderRadius: "4px",
+                                            cursor: "pointer",
+                                            fontSize: "14px"
+                                        }}
+                                    >
+                                        Refresh Data
+                                    </button>
+                                </div>
+                                {loading ? (
+                                    <p style={{ textAlign: "center" }}>Loading analytics data...</p>
+                                ) : (
+                                    <AnalyticsPanel disasterData={tweetLocations} />
                                 )}
                             </div>
                         }

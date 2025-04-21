@@ -10,6 +10,7 @@ import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // Import the disaster keyword mapping
 const disasterKeywordMap = {
+    "All Disasters": [],
     "Avalanche": ["avalanche"],
     "Blizzard": ["blizzard"],
     "Drought": ["drought"],
@@ -31,6 +32,7 @@ const getDisasterType = (text) => {
     const lowerText = text.toLowerCase();
     
     for (const [disasterType, keywords] of Object.entries(disasterKeywordMap)) {
+        if (disasterType === "All Disasters") continue;
         for (const keyword of keywords) {
             if (lowerText.includes(keyword)) {
                 return disasterType;
@@ -54,15 +56,26 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const TweetMarkerMap = ({ tweetLocations }) => {
     const hasLocations = tweetLocations && tweetLocations.length > 0;
     const [selectedTweet, setSelectedTweet] = useState(null);
+    const [selectedDisaster, setSelectedDisaster] = useState("All Disasters");
 
     const handleMarkerClick = (tweet) => {
         setSelectedTweet(tweet);
     };
 
+    const handleDisasterFilter = (event) => {
+        setSelectedDisaster(event.target.value);
+    };
+
+    const filteredLocations = tweetLocations.filter(tweet => {
+        if (selectedDisaster === "All Disasters") return true;
+        return getDisasterType(tweet.text) === selectedDisaster;
+    });
+
     return (
         <div
             style={{
                 display: "flex",
+                flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
                 padding: "1rem",
@@ -70,6 +83,33 @@ const TweetMarkerMap = ({ tweetLocations }) => {
                 minHeight: "10vh",
             }}
         >
+            <div
+                style={{
+                    width: "100%",
+                    maxWidth: "1000px",
+                    marginBottom: "1rem",
+                }}
+            >
+                <select
+                    value={selectedDisaster}
+                    onChange={handleDisasterFilter}
+                    style={{
+                        width: "100%",
+                        padding: "0.5rem",
+                        fontSize: "1rem",
+                        borderRadius: "8px",
+                        border: "1px solid #ddd",
+                        backgroundColor: "white",
+                        cursor: "pointer",
+                    }}
+                >
+                    {Object.keys(disasterKeywordMap).map((disaster) => (
+                        <option key={disaster} value={disaster}>
+                            {disaster}
+                        </option>
+                    ))}
+                </select>
+            </div>
             <div
                 style={{
                     width: "100%",
@@ -112,7 +152,7 @@ const TweetMarkerMap = ({ tweetLocations }) => {
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         />
-                        {tweetLocations.map((tweet, index) => (
+                        {filteredLocations.map((tweet, index) => (
                             <Marker
                                 key={index}
                                 position={[tweet.lat, tweet.lng]}
