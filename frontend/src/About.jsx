@@ -2,12 +2,34 @@
 import { tweetService } from './services/api'; // <-- fixed path
  
 const disasterColors = {
-    Hurricane: { background: "#FFE5B4", text: "#000", border: "#FF6B35" },
-    Flood: { background: "#E0F8FF", text: "#000", border: "#0077BE" },
-    Earthquake: { background: "#F0F0F0", text: "#000", border: "#808080" },
-    Tornado: { background: "#F0E6FF", text: "#000", border: "#6A5ACD" },
-    Tsunami: { background: "#E6F3E6", text: "#000", border: "#2E8B57" },
-    Wildfire: { background: "#FFFFFF", text: "#000", border: "#2E8B57" }
+    Avalanche: { background: "#FFF", text: "#000", border: "#476684" },
+    Blizzard: { background: "#6EB0EF", text: "#000", border: "#87CEEB" },
+    Drought: { background: "#AD9270", text: "#000", border: "#855C50" },
+    Duststorm: { background: "#FDD674", text: "#000", border: "#C1972D" },
+    Earthquake: { background: "#D6B5A6", text: "#000", border: "#AB846F" },
+    "Volcanic Eruption": { background: "#F32B0D", text: "#FFF", border: "#FCB930" },
+    Flood: { background: "#0000FF  ", text: "#FFF", border: "#000088 " },
+    Hailstorm: { background: "#D0D1E1", text: "#000", border: "#B4B3AE" },
+    Hurricane: { background: "#A4948E", text: "#000", border: "#907C75" },
+    Landslide: { background: "#A05C53", text: "#000", border: "#8B4513" },
+    Tornado: { background: "#899A9F", text: "#000", border: "#7D7D7D" },
+    Wildfire: { background: "#FA5D0A", text: "#000", border: "#FF4500" }
+};
+
+// Map disaster categories to their related keywords
+const disasterKeywordMap = {
+    "Avalanche": ["avalanche"],
+    "Blizzard": ["blizzard"],
+    "Drought": ["drought"],
+    "Duststorm": ["duststorm"],
+    "Earthquake": ["earthquake"],
+    "Volcanic Eruption": ["eruption", "volcano"],
+    "Flood": ["flood", "flooding"],
+    "Hailstorm": ["hailstorm"],
+    "Hurricane": ["hurricane"],
+    "Landslide": ["landslide"],
+    "Tornado": ["tornado"],
+    "Wildfire": ["wildfire"]
 };
  
 function parseTweetDate(timeStr) {
@@ -50,7 +72,13 @@ export default function Home() {
  
     const filteredTweets = (activeTab === "All"
         ? tweets
-        : tweets.filter(tweet => tweet.keyword.toLowerCase() === activeTab.toLowerCase())
+        : tweets.filter(tweet => {
+            const keyword = tweet.keyword.toLowerCase();
+            if (disasterKeywordMap[activeTab] && disasterKeywordMap[activeTab].includes(keyword)) {
+                return true;
+            }
+            return keyword === activeTab.toLowerCase();
+        })
     ).slice();
     
     // Function to refresh the data
@@ -76,7 +104,7 @@ export default function Home() {
         <div style={{ backgroundColor: "#312f74", minHeight: "100vh", padding: "16px", color: "white" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                 <div style={{ display: "flex", gap: "24px" }}>
-                    {["All", "Hurricane", "Flood", "Earthquake", "Tornado", "Tsunami", "Wildfire"].map(tab => (
+                    {["All", "Avalanche", "Blizzard", "Drought", "Duststorm", "Earthquake", "Volcanic Eruption", "Flood","Hailstorm", "Hurricane", "Landslide", "Tornado", "Wildfire"].map(tab => (
                         <h1
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -93,14 +121,6 @@ export default function Home() {
                         </h1>
                     ))}
                 </div>
-                
-                <select style={{ padding: "8px", borderRadius: "4px" }}>
-                    <option>United States</option>
-                    <option>Gulf Coast</option>
-                    <option>Pacific Coast</option>
-                    <option>Midwest</option>
-                    <option>East Coast</option>
-                </select>
             </div>
             
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
@@ -136,7 +156,19 @@ export default function Home() {
                     </div>
                 ) : filteredTweets.length > 0 ? (
                     filteredTweets.map(tweet => {
-                        const colorScheme = disasterColors[tweet.keyword] || disasterColors.Hurricane;
+                        // Determine which disaster category the keyword belongs to
+                        let categoryForKeyword = tweet.keyword;  // Default
+                        const keyword = tweet.keyword.toLowerCase();
+                        
+                        // Find which category this keyword belongs to
+                        for (const [category, keywords] of Object.entries(disasterKeywordMap)) {
+                            if (keywords.includes(keyword)) {
+                                categoryForKeyword = category;
+                                break;
+                            }
+                        }
+                        
+                        const colorScheme = disasterColors[categoryForKeyword] || disasterColors.Hurricane;
                     
                         return (
                             <div
