@@ -39,6 +39,7 @@ function parseTweetDate(timeStr) {
  
 export default function Home() {
     const [activeTab, setActiveTab] = useState("All");
+    const [timeRange, setTimeRange] = useState("24h"); // "24h" or "week"
     const [tweets, setTweets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(new Date());
@@ -58,14 +59,16 @@ export default function Home() {
         }).length;
     };
 
-    // 🛰️ Fetch tweets on mount
+    // 🛰️ Fetch tweets on mount and when timeRange changes
     useEffect(() => {
         async function fetchTweets() {
             setLoading(true);
             try {
-                // Get tweets from the last 24 hours
-                const data = await tweetService.getRecentTweets();
- 
+                // Get tweets based on selected time range
+                const data = timeRange === "24h" 
+                    ? await tweetService.getRecentTweets()
+                    : await tweetService.getWeekTweets();
+
                 // Only keep needed fields
                 const parsed = data.map(tweet => ({
                     id: tweet.id || tweet.text, // fallback key
@@ -74,7 +77,7 @@ export default function Home() {
                     sentiment_score: tweet.sentiment_score,
                     createdAt: tweet.createdAt
                 }));
- 
+
                 setTweets(parsed);
                 setLastUpdated(new Date());
             } catch (error) {
@@ -83,9 +86,9 @@ export default function Home() {
                 setLoading(false);
             }
         }
- 
+
         fetchTweets();
-    }, []);
+    }, [timeRange]);
  
     const filteredTweets = (activeTab === "All"
         ? tweets
@@ -102,7 +105,9 @@ export default function Home() {
     const refreshData = async () => {
         try {
             setLoading(true);
-            const data = await tweetService.getRecentTweets();
+            const data = timeRange === "24h"
+                ? await tweetService.getRecentTweets()
+                : await tweetService.getWeekTweets();
             const parsed = data.map(tweet => ({
                 id: tweet.id || tweet.text,
                 text: tweet.original_text,
@@ -121,6 +126,49 @@ export default function Home() {
  
     return (
         <div style={{ backgroundColor: "#333", minHeight: "100vh", padding: "16px", color: "white" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                <div style={{ display: "flex", gap: "10px" }}>
+                    <button
+                        onClick={() => setTimeRange("24h")}
+                        style={{
+                            padding: "8px 16px",
+                            backgroundColor: timeRange === "24h" ? "#2196F3" : "#e0e0e0",
+                            color: timeRange === "24h" ? "white" : "black",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer"
+                        }}
+                    >
+                        Last 24 Hours
+                    </button>
+                    <button
+                        onClick={() => setTimeRange("week")}
+                        style={{
+                            padding: "8px 16px",
+                            backgroundColor: timeRange === "week" ? "#2196F3" : "#e0e0e0",
+                            color: timeRange === "week" ? "white" : "black",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer"
+                        }}
+                    >
+                        Last Week
+                    </button>
+                </div>
+                <button
+                    onClick={refreshData}
+                    style={{
+                        padding: "8px 16px",
+                        backgroundColor: "#4CAF50",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer"
+                    }}
+                >
+                    Refresh Data
+                </button>
+            </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                 <div 
                     ref={tabContainerRef}
@@ -178,20 +226,6 @@ export default function Home() {
                 <div style={{ fontSize: "14px", color: "#ccc" }}>
                     Last updated: {lastUpdated.toLocaleString()}
                 </div>
-                <button 
-                    onClick={refreshData}
-                    style={{
-                        backgroundColor: "#4CAF50",
-                        color: "white",
-                        border: "none",
-                        padding: "8px 16px",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontSize: "14px"
-                    }}
-                >
-                    Refresh Data
-                </button>
             </div>
                 
             <div style={{

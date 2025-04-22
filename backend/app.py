@@ -142,6 +142,17 @@ def get_recent_tweets(session: Session = Depends(get_session)):
     tweets = session.exec(statement).all()
     return tweets
 
+# GET tweets from the last week
+@app.get("/tweets/week", response_model=List[dbPost])
+def get_week_tweets(session: Session = Depends(get_session)):
+    # Calculate timestamp for 7 days ago
+    week_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    
+    # Select tweets created in the last week
+    statement = select(dbPost).where(dbPost.createdAt >= week_ago).order_by(dbPost.createdAt.desc())
+    tweets = session.exec(statement).all()
+    return tweets
+
 # GET tweets by keyword
 @app.get("/tweets/keyword/{keyword}", response_model=List[dbPost])
 def get_tweets_by_keyword(keyword: str, session: Session = Depends(get_session)):
@@ -149,7 +160,7 @@ def get_tweets_by_keyword(keyword: str, session: Session = Depends(get_session))
     tweets = session.exec(statement).all()
     return tweets
 
-# GET tweet locations for heatmap
+# GET tweet locations for map
 @app.get("/tweets/locations")
 def get_tweet_locations(session: Session = Depends(get_session)):
     statement = select(dbPost).where(
@@ -177,14 +188,6 @@ def get_sentiment_scores(session: Session = Depends(get_session)):
     statement = select(dbPost).where(dbPost.sentiment_score.is_not(None))
     tweets = session.exec(statement).all()
     return tweets
-
-# POST a new tweet
-@app.post("/tweets", response_model=dbPost)
-def add_tweet(tweet: dbPost, session: Session = Depends(get_session)):
-    session.add(tweet)
-    session.commit()
-    session.refresh(tweet)
-    return tweet
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000) 

@@ -22,6 +22,17 @@ export const tweetService = {
     }
   },
 
+  // Get tweets from the last week
+  getWeekTweets: async () => {
+    try {
+      const response = await api.get('/tweets/week');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching week tweets:', error);
+      throw error;
+    }
+  },
+
   // Get tweets by keyword
   getTweetsByKeyword: async (keyword) => {
     try {
