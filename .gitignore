@@ -4,7 +4,7 @@ venv/
 ENV/
 
 # Large model files
-trained_model_bert_uncased/
+# trained_model_bert_uncased/
 *.safetensors
 
 # Python cache
