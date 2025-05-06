@@ -5,7 +5,7 @@ ENV/
 
 # Large model files
 # trained_model_bert_uncased/
-*.safetensors
+# *.safetensors
 
 # Python cache
 __pycache__/
