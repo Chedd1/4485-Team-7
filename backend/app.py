@@ -32,7 +32,7 @@ except Exception as e:
 app = FastAPI()
 
 # Configure CORS
-origins = ["http://localhost:5173"]  # Your frontend URL
+origins = ["http://localhost:5173", "https://white-bay-05adc6c10.6.azurestaticapps.net"]  # Your frontend URL
 
 app.add_middleware(
     CORSMiddleware,
